@@ -26,6 +26,13 @@ export class CustomerOrdersComponent implements OnInit {
   ratingVisible: { [key: number]: boolean } = {};
   loading = false;
 
+  // Pagination
+  currentPage: number = 1;
+  itemsPerPage: number = 16;
+  totalPages: number = 0;
+  paginatedOrders: CustomerOrder[] = [];
+
+
   @ViewChild('confirmModal') confirmModal!: ConfirmModalComponent;
 
   constructor(private orderService: OrderService, private toast: ToastService) { }
@@ -36,6 +43,8 @@ export class CustomerOrdersComponent implements OnInit {
     this.orderService.getOrdersByCustomer(this.customerId).subscribe({
       next: (data) => {
         this.orders = data;
+        this.totalPages = Math.ceil(this.orders.length / this.itemsPerPage);
+        this.updatePaginatedOrders();
         this.loading = false;
       },
       error: (err) => {
@@ -45,6 +54,11 @@ export class CustomerOrdersComponent implements OnInit {
     });
   }
 
+  updatePaginatedOrders(): void {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    this.paginatedOrders = this.orders.slice().reverse().slice(start, end);
+  }
 
 
   getStatusClass(status: string): string {
@@ -111,5 +125,27 @@ export class CustomerOrdersComponent implements OnInit {
     this.closeRatingModal();
     this.toast.show('Thank you for rating this product!', 'success');
   }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePaginatedOrders();
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedOrders();
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedOrders();
+    }
+  }
+
 
 }

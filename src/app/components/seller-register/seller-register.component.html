@@ -42,6 +42,22 @@
                     </div>
 
                     <div class="mb-1">
+                        <label class="form-label">Email</label>
+                        <input type="email" formControlName="email" class="form-control" placeholder="Enter email" />
+
+                        <div *ngIf="submitted && f['email'].errors" class="text-danger small">
+
+                            <small *ngIf="f['email'].errors['required']">Email is required</small>
+
+                            <small *ngIf="f['email'].errors['email']">Enter valid email</small>
+
+                            <small *ngIf="f['email'].errors['emailExists']">Email already exists</small>
+
+                        </div>
+                    </div>
+
+
+                    <div class="mb-1">
                         <label class="form-label">Contact</label>
                         <input type="text" formControlName="contact" class="form-control"
                             placeholder="10-digit number" />

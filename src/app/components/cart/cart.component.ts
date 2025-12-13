@@ -101,7 +101,7 @@ export class CartComponent implements OnInit {
   remove(itemId: number) {
     this.cartService.removeItem(itemId).subscribe({
       next: () => {
-        this.toast.show('Item remove from cart successfully!', 'success');
+        // this.toast.show('Item remove from cart successfully!', 'success');
         this.loadCart();
       },
       error: (err) => {
@@ -152,6 +152,7 @@ export class CartComponent implements OnInit {
 
           this.toast.show(`Order placed for ${item.productName}`, 'success');
           this.remove(item.id);
+            this.router.navigate(['/customer-order']);
         },
         error: (err) => {
           console.error(err);
@@ -160,6 +161,6 @@ export class CartComponent implements OnInit {
       });
     });
 
-    this.router.navigate(['/customer-order']);
+  
   }
 }

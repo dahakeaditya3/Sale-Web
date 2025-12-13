@@ -95,9 +95,16 @@ export class SellerRegisterComponent implements OnInit {
         this.registerForm.reset();
         this.submitted = false;
       },
-      error: (err) => {
+     error: (err) => {
         console.error(err);
-        this.toast.show('Something went wrong. Try again!', 'error'); //
+
+        if (err.status === 409) {
+          this.registerForm.get('email')?.setErrors({ emailExists: true });
+          this.toast.show('Email already exists!', 'error');
+          return;
+        }
+
+        this.toast.show('Something went wrong. Try again!', 'error');
       }
     });
   }

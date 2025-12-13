@@ -3,7 +3,7 @@ import { FormBuilder, Validators, ReactiveFormsModule, FormGroup, AbstractContro
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { ToastService } from '../../services/toast.service'; 
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-customer-register',
@@ -21,7 +21,7 @@ export class CustomerRegisterComponent implements OnInit {
     private fb: FormBuilder,
     private http: HttpClient,
     private router: Router,
-    private toast: ToastService 
+    private toast: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -35,27 +35,21 @@ export class CustomerRegisterComponent implements OnInit {
         password: ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', Validators.required]
       },
-      {
-        validators: this.passwordMatchValidator('password', 'confirmPassword')
-      }
+      { validators: this.passwordMatchValidator('password', 'confirmPassword') }
     );
   }
 
   passwordMatchValidator(password: string, confirmPassword: string): ValidatorFn {
     return (formGroup: AbstractControl): ValidationErrors | null => {
-      const passControl = formGroup.get(password);
-      const confirmControl = formGroup.get(confirmPassword);
+      const pass = formGroup.get(password);
+      const confirm = formGroup.get(confirmPassword);
 
-      if (!passControl || !confirmControl) return null;
+      if (!pass || !confirm) return null;
 
-      if (confirmControl.errors && !confirmControl.errors['passwordMismatch']) {
-        return null;
-      }
-
-      if (passControl.value !== confirmControl.value) {
-        confirmControl.setErrors({ passwordMismatch: true });
+      if (pass.value !== confirm.value) {
+        confirm.setErrors({ passwordMismatch: true });
       } else {
-        confirmControl.setErrors(null);
+        confirm.setErrors(null);
       }
 
       return null;
@@ -70,7 +64,7 @@ export class CustomerRegisterComponent implements OnInit {
     this.submitted = true;
 
     if (this.registerForm.invalid) {
-      this.toast.show('Please fill all required fields correctly!', 'error'); // ⚠️ Toast message
+      this.toast.show('Please fill all fields correctly!', 'error');
       return;
     }
 
@@ -87,14 +81,20 @@ export class CustomerRegisterComponent implements OnInit {
 
     this.http.post('https://localhost:7011/api/Customers', customerData).subscribe({
       next: () => {
-        this.toast.show('Customer Registered Successfully', 'success'); 
+        this.toast.show('Customer Registered Successfully', 'success');
         this.router.navigateByUrl('/login');
         this.registerForm.reset();
         this.submitted = false;
       },
       error: (err) => {
         console.error(err);
-        this.toast.show('Something went wrong. Try again!', 'error'); 
+
+        if (err.status === 409) {
+          this.registerForm.get('email')?.setErrors({ emailExists: true });
+          this.toast.show('Email already exists!', 'error');
+          return;
+        }
+        this.toast.show('Something went wrong. Try again!', 'error');
       }
     });
   }
